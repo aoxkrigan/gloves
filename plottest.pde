@@ -38,51 +38,13 @@ float gscale2 = 0.030534;
 float gscale3 = 0.061068;
 float[] gscales = {0.007633, 0.015267, 0.015267, 0.061068};
 
-float ascale=ascale2;
-float gscale=gscale2;
-Hand left = new Hand();
-Hand right = new Hand();
-
-void setup() {
-  clear();
-  delay(3000);
-  //size(1000, 1000, P3D);
-  fullScreen(P3D, 2);
-  //fullScreen(P3D, SPAN);
-  frameRate(60);
-  background(0);
-  noiseSeed(2);
-
-  //Hand left = new Hand();
-  output = createWriter("data.txt");
-  //leftPort = new Serial(this, leftcom, 115200);
-  //leftPort.clear();
-  //leftPort.buffer(84);
-
-  //rightPort = new Serial(this, rightcom, 115200);
-  //rightPort.clear();
-  //rightPort.buffer(84);
-  //t0=millis();
-}
-
-float rot=.01;
-float[] tx={0, 0};
-float[] ty={0, 0};
-float[] tz={0, 0};
-int counter=0;
-int instance=0;
-void seriall() {
-  serialEvent(leftPort, left);
-}
-void serialr() {
-  serialEvent(rightPort, right);
-}
-
-void draw()
-{
-  //thread("seriall");
-  // thread("serialr");
-}
+float ascale=ascales[2];
+float gscale=gscales[2];
+int[] atrans = {2, 4, 8, 16};
+int[] gtrans = {250, 500, 1000, 2000};
+int atran=atrans[2];
+int gtran=gtrans[2];
+int[] imuscales = {atran, gtran};
 
 class Hand {
   byte[][] inBuffer = new byte[2][84];
@@ -96,15 +58,19 @@ class Hand {
   float flex[] ={0, 0, 0, 0, 0, 0};
   float[] result3= {0, 0, 0};
   float[] result5= {0, 0, 0, 0, 0};
+  int count=0;
+  int histlength = 120;
+  float hist[][][] = new float[6][6][histlength];
+  float fhist[][]= new float[6][histlength];
 
   Hand() {
     //ba = new PVector(0, 0, 0);
     //bg = new PVector(0, 0, 0);
     for (int i=0; i<6; i++) {
-      for (int j=0; j<3; j++) {
-        ha[0] = new PVector(0, 0, 0);
-        hg[0] = new PVector(0, 0, 0);
-      }
+      //for (int j=0; j<3; j++) {
+        ha[i] = new PVector(0, 0, 0);
+        hg[i] = new PVector(0, 0, 0);
+      //}
     }
   }
   float[] getax() {
@@ -157,6 +123,110 @@ class Hand {
   }
 }
 
+Hand left = new Hand();
+//Hand right = new Hand();
+
+void setup() {
+  clear();
+  delay(3000);
+  //size(1000, 1000, P3D);
+  fullScreen(P3D, 2);
+  //fullScreen(P3D, SPAN);
+  frameRate(60);
+  background(0);
+  noiseSeed(2);
+
+  //left = new Hand();
+  //output = createWriter("data.txt");
+  leftPort = new Serial(this, leftcom, 115200);
+  leftPort.clear();
+  leftPort.buffer(84);
+
+  //rightPort = new Serial(this, rightcom, 115200);
+  //rightPort.clear();
+  //rightPort.buffer(84);
+  //t0=millis();
+}
+
+float rot=.01;
+float[] tx={0, 0};
+float[] ty={0, 0};
+float[] tz={0, 0};
+int counter=0;
+int instance=0;
+void seriall() {
+  serialEvent(leftPort, left);
+}
+//void serialr() {
+//  serialEvent(rightPort, right);
+//}
+color c1 = color(255, 140, 0);
+color c2 = color(255, 0, 0);
+color c3 = color(128, 0, 128);
+color c4 = color(0, 0, 255);
+color c5 = color(0, 255, 0);
+color c6 = color(255, 255, 0);
+color[] colors = {c1, c2, c3, c4, c5, c6};
+void draw()
+{
+  //println(frameRate);
+  serialEvent(leftPort, left);
+  //thread("seriall");
+  // thread("serialr");
+  background(0);
+  outline(0, 0);
+  outline(1, 0);
+  outline(2, 0);
+  outline(0, 1);
+  outline(1, 1);
+  outline(2, 1);
+  flexg();
+ // println(left.count);
+  left.count++;
+  if (left.count==120) {
+    left.count=0;
+  }
+}
+
+void outline(int x, int y) {
+  pushMatrix();
+  noFill();
+  stroke(255);
+  //translate(30, 20, 0);
+  translate((x*600+x*30+30), (y*333+y*20+20), 0);
+  //rect((x*600+x*30+30), (y*333+y*20+20), 600, 333);
+  rect(0, 0, 600, 333);
+  translate(0, 166.5, 0);
+  for (int f=0; f<6; f++) {
+    //println("f",f);
+    stroke(colors[f]);
+    int hptr= left.count+1;
+    int dif1 = left.histlength-hptr;
+    int len=left.histlength;
+    //println("len",len);
+    for (int i=0; i<dif1; i++) {
+      //println(i);
+      ellipse(i*5, left.hist[f][(x+(y*3))][hptr+i]/imuscales[y]*166,2,2);
+    }
+    for (int i=0; i<hptr; i++) {
+      //println(left.hist[f][(x+(y*3))]);
+      ellipse((dif1+i)*5, left.hist[f][(x+(y*3))][i]/imuscales[y]*166,2,2);
+    }
+  }
+  popMatrix();
+}
+
+void flexg() {
+  pushMatrix();
+  noFill();
+  stroke(255);
+  translate(30, 20, 0);
+  rect(0, 706, 1860, 333);
+
+
+  popMatrix();
+}
+
 void serialEvent(Serial port, Hand hand) {
   byte[] inBuffer = new byte[84];
   if (hand.firstContact == false) {
@@ -179,7 +249,7 @@ void serialEvent(Serial port, Hand hand) {
           hand.hg[readnum].x=int((inBuffer[8+(readnum*14)] << 8) | (inBuffer[9+(readnum*14)] & 0xff));
           hand.hg[readnum].y=int((inBuffer[10+(readnum*14)] << 8) | (inBuffer[11+(readnum*14)] & 0xff));
           hand.hg[readnum].z=int((inBuffer[12+(readnum*14)] << 8) | (inBuffer[13+(readnum*14)] & 0xff));
-
+          //println(hand.ha[0].x);
           //ACCELERATIONS SIGN CONVERSION
           if (hand.ha[readnum].x>negcheck) {
             hand.ha[readnum].x = (-(hand.ha[readnum].x - negcheck)*ascale);
@@ -212,10 +282,17 @@ void serialEvent(Serial port, Hand hand) {
           } else {
             hand.hg[readnum].z=hand.hg[readnum].z*gscale;
           }
+          hand.hist[readnum][0][hand.count]=hand.ha[readnum].x;
+          hand.hist[readnum][1][hand.count]=hand.ha[readnum].y;
+          hand.hist[readnum][2][hand.count]=hand.ha[readnum].z;
+          hand.hist[readnum][3][hand.count]=hand.hg[readnum].x;
+          hand.hist[readnum][4][hand.count]=hand.hg[readnum].y;
+          hand.hist[readnum][5][hand.count]=hand.hg[readnum].z;
+          hand.fhist[readnum][hand.count]=hand.flex[readnum];
         }
       }
       port.write("A");
-      redraw();
+      //redraw();
     }
   }
 }
