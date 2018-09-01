@@ -36,7 +36,7 @@ float gscale0 = 0.007633;
 float gscale1 = 0.015267;
 float gscale2 = 0.030534;
 float gscale3 = 0.061068;
-float[] gscales = {0.007633, 0.015267, 0.015267, 0.061068};
+float[] gscales = {0.007633, 0.015267, 0.030534, 0.061068};
 
 float ascale=ascales[2];
 float gscale=gscales[2];
@@ -156,6 +156,7 @@ int counter=0;
 int instance=0;
 int t1=0;
 int t2=0;
+int t3=0;
 void seriall() {
   serialEvent(leftPort, left);
 }
@@ -176,6 +177,7 @@ void draw()
   thread("seriall");
   // thread("serialr");
   background(50);
+  text(frameRate, 30, 30);
   outline(0, 0);
   outline(1, 0);
   outline(2, 0);
@@ -203,7 +205,6 @@ void outline(int x, int y) {
     int hptr= left.count+1;
     int dif = left.histlength-hptr;
     for (int i=0; i<dif; i++) {
-      //println(i);
       point(i*5, left.hist[f][(x+(y*3))][hptr+i]/imuscales[y]*-166);
     }
     for (int i=0; i<hptr; i++) {
@@ -225,10 +226,10 @@ void flexg() {
     int hptr= left.count+1;
     int dif = left.histlength-hptr;
     for (int i=0; i<dif; i++) {
-      point(i*15, left.fhist[f][hptr+i]*5/1024*-66);
+      point(i*15.5, left.fhist[f][hptr+i]*5/1024*-66);
     }
     for (int i=0; i<hptr; i++) {
-      point((dif+i)*15, left.fhist[f][i]*5/1024*-66);
+      point((dif+i)*15.5, left.fhist[f][i]*5/1024*-66);
     }
   }
   popMatrix();
