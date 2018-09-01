@@ -68,8 +68,8 @@ class Hand {
     //bg = new PVector(0, 0, 0);
     for (int i=0; i<6; i++) {
       //for (int j=0; j<3; j++) {
-        ha[i] = new PVector(0, 0, 0);
-        hg[i] = new PVector(0, 0, 0);
+      ha[i] = new PVector(0, 0, 0);
+      hg[i] = new PVector(0, 0, 0);
       //}
     }
   }
@@ -154,6 +154,8 @@ float[] ty={0, 0};
 float[] tz={0, 0};
 int counter=0;
 int instance=0;
+int t1=0;
+int t2=0;
 void seriall() {
   serialEvent(leftPort, left);
 }
@@ -163,17 +165,17 @@ void seriall() {
 color c1 = color(255, 140, 0);
 color c2 = color(255, 0, 0);
 color c3 = color(128, 0, 128);
-color c4 = color(0, 0, 255);
+color c4 = color(255, 255, 255);
 color c5 = color(0, 255, 0);
 color c6 = color(255, 255, 0);
 color[] colors = {c1, c2, c3, c4, c5, c6};
 void draw()
 {
   //println(frameRate);
-  serialEvent(leftPort, left);
-  //thread("seriall");
+  //serialEvent(leftPort, left);
+  thread("seriall");
   // thread("serialr");
-  background(0);
+  background(50);
   outline(0, 0);
   outline(1, 0);
   outline(2, 0);
@@ -181,7 +183,7 @@ void draw()
   outline(1, 1);
   outline(2, 1);
   flexg();
- // println(left.count);
+  // println(left.count);
   left.count++;
   if (left.count==120) {
     left.count=0;
@@ -191,26 +193,21 @@ void draw()
 void outline(int x, int y) {
   pushMatrix();
   noFill();
-  stroke(255);
-  //translate(30, 20, 0);
+  stroke(150);
   translate((x*600+x*30+30), (y*333+y*20+20), 0);
-  //rect((x*600+x*30+30), (y*333+y*20+20), 600, 333);
   rect(0, 0, 600, 333);
   translate(0, 166.5, 0);
+  line(0, 0, 600, 0);
   for (int f=0; f<6; f++) {
-    //println("f",f);
     stroke(colors[f]);
     int hptr= left.count+1;
-    int dif1 = left.histlength-hptr;
-    int len=left.histlength;
-    //println("len",len);
-    for (int i=0; i<dif1; i++) {
+    int dif = left.histlength-hptr;
+    for (int i=0; i<dif; i++) {
       //println(i);
-      ellipse(i*5, left.hist[f][(x+(y*3))][hptr+i]/imuscales[y]*166,2,2);
+      point(i*5, left.hist[f][(x+(y*3))][hptr+i]/imuscales[y]*-166);
     }
     for (int i=0; i<hptr; i++) {
-      //println(left.hist[f][(x+(y*3))]);
-      ellipse((dif1+i)*5, left.hist[f][(x+(y*3))][i]/imuscales[y]*166,2,2);
+      point((dif+i)*5, left.hist[f][(x+(y*3))][i]/imuscales[y]*-166);
     }
   }
   popMatrix();
@@ -219,11 +216,21 @@ void outline(int x, int y) {
 void flexg() {
   pushMatrix();
   noFill();
-  stroke(255);
+  stroke(150);
   translate(30, 20, 0);
   rect(0, 706, 1860, 333);
-
-
+  translate(0, 1060, 0);
+  for (int f=0; f<5; f++) {
+    stroke(colors[f]);
+    int hptr= left.count+1;
+    int dif = left.histlength-hptr;
+    for (int i=0; i<dif; i++) {
+      point(i*15, left.fhist[f][hptr+i]*5/1024*-66);
+    }
+    for (int i=0; i<hptr; i++) {
+      point((dif+i)*15, left.fhist[f][i]*5/1024*-66);
+    }
+  }
   popMatrix();
 }
 
